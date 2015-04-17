@@ -2,6 +2,8 @@ package com.prolificinteractive.materialcalendarview.sample;
 
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
+import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 
 import com.prolificinteractive.materialcalendarview.CalendarDay;
@@ -10,6 +12,8 @@ import com.prolificinteractive.materialcalendarview.OnDateChangedListener;
 
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
+import java.util.Date;
 
 /**
  * Shows off the most basic usage
@@ -26,8 +30,22 @@ public class BasicActivity extends ActionBarActivity implements OnDateChangedLis
 
         textView = (TextView) findViewById(R.id.textView);
 
-        MaterialCalendarView widget = (MaterialCalendarView) findViewById(R.id.calendarView);
+        final MaterialCalendarView widget = (MaterialCalendarView) findViewById(R.id.calendarView);
+
         widget.setOnDateChangedListener(this);
+
+        ((Button) findViewById(R.id.debugButton)).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Calendar cal = Calendar.getInstance();
+                cal.setTimeInMillis(0);
+                cal.set(2015, Calendar.APRIL, 20);
+
+                System.out.println("Fecha a borrar: " + cal.toString());
+
+                widget.enableDay(new CalendarDay(cal), false);
+            }
+        });
     }
 
     @Override

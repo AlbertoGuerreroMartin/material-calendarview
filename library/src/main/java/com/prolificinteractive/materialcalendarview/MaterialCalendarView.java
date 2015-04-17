@@ -32,6 +32,7 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
+import java.util.List;
 
 /**
  * <p>
@@ -687,6 +688,13 @@ public class MaterialCalendarView extends FrameLayout {
         return outValue.data;
     }
 
+    //--- Convenience method for enable / disable days ---
+    public void enableDay(CalendarDay day, boolean enable) {
+        System.out.println("Calendar Month: " + day.getMonth());
+        adapter.enableDayOfMonth(day, enable);
+    }
+    //-----------------------------------------------------
+
     private static class MonthPagerAdapter extends PagerAdapter {
 
         private static final int TAG_ITEM = R.id.mcv_pager;
@@ -706,7 +714,12 @@ public class MaterialCalendarView extends FrameLayout {
         private CalendarDay selectedDate = null;
         private WeekDayFormatter weekDayFormatter = WeekDayFormatter.DEFAULT;
 
+        private ArrayList<CalendarDay> disabledDays;
+
         private MonthPagerAdapter(MaterialCalendarView view) {
+
+            disabledDays = new ArrayList<>();
+
             this.view = view;
             this.inflater = LayoutInflater.from(view.getContext());
             currentViews = new LinkedList<>();
@@ -783,6 +796,16 @@ public class MaterialCalendarView extends FrameLayout {
 
             container.addView(monthView);
             currentViews.add(monthView);
+
+            //--- Set disabled days ---
+            for (CalendarDay day : disabledDays) {
+                if (month.getMonth() == day.getMonth()) {
+                    monthView.addDisabledDay(day);
+                }
+            }
+            monthView.forceUpdateUi();
+            //-------------------------
+
             return monthView;
         }
 
@@ -926,6 +949,33 @@ public class MaterialCalendarView extends FrameLayout {
         protected int getWeekDayTextAppearance() {
             return weekDayTextAppearance == null ? 0 : weekDayTextAppearance;
         }
+
+
+
+
+
+
+        //--- Convenience method for enable / disable days ---
+        public void enableDayOfMonth(CalendarDay day, boolean enable) {
+            if(!enable) {
+                for (MonthView monthView : currentViews) {
+                    if (((CalendarDay) monthView.getTag(TAG_ITEM)).getMonth() == day.getMonth()) {
+                        disabledDays.add(day);
+                        monthView.addDisabledDay(day);
+                        monthView.forceUpdateUi();
+                    }
+                }
+            } else {
+                for (MonthView monthView : currentViews) {
+                    if (((CalendarDay) monthView.getTag(TAG_ITEM)).getMonth() == day.getMonth()) {
+                        disabledDays.remove(day);
+                        monthView.removeDisabledDay(day);
+                        monthView.forceUpdateUi();
+                    }
+                }
+            }
+        }
+        //----------------------------------------------------
     }
 
 }

@@ -23,6 +23,7 @@ class DayView extends CheckedTextView {
 
     private CalendarDay date = new CalendarDay();
     private int selectionColor = Color.GRAY;
+    private boolean dayEnabled = true;
 
     private final int fadeTime;
 
@@ -42,6 +43,10 @@ class DayView extends CheckedTextView {
         if(isInEditMode()) {
             setText("99");
         }
+    }
+
+    public void setDayEnabled(boolean dayEnabled) {
+        this.dayEnabled = dayEnabled;
     }
 
     public void setDay(CalendarDay date) {
@@ -64,7 +69,7 @@ class DayView extends CheckedTextView {
     }
 
     protected void setupSelection(boolean showOtherDates, boolean inRange, boolean inMonth) {
-        boolean enabled = inMonth && inRange;
+        boolean enabled = inMonth && inRange && dayEnabled;
         setEnabled(enabled);
         setVisibility(enabled || showOtherDates ? View.VISIBLE : View.INVISIBLE);
     }
