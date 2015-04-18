@@ -32,7 +32,6 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedList;
-import java.util.List;
 
 /**
  * <p>
@@ -688,12 +687,12 @@ public class MaterialCalendarView extends FrameLayout {
         return outValue.data;
     }
 
-    //--- Convenience method for enable / disable days ---
-    public void enableDay(CalendarDay day, boolean enable) {
-        System.out.println("Calendar Month: " + day.getMonth());
-        adapter.enableDayOfMonth(day, enable);
+
+    //--- Convenience methods for enable / disable days ---
+    public void enableDayOfWeek(int dayOfWeek, boolean enable) {
+        adapter.enableDayOfWeek(dayOfWeek, enable);
     }
-    //-----------------------------------------------------
+    //------------------------------------------------------
 
     private static class MonthPagerAdapter extends PagerAdapter {
 
@@ -714,11 +713,11 @@ public class MaterialCalendarView extends FrameLayout {
         private CalendarDay selectedDate = null;
         private WeekDayFormatter weekDayFormatter = WeekDayFormatter.DEFAULT;
 
-        private ArrayList<CalendarDay> disabledDays;
+        private ArrayList<Integer> globalDisabledWeeks;
 
         private MonthPagerAdapter(MaterialCalendarView view) {
 
-            disabledDays = new ArrayList<>();
+            globalDisabledWeeks = new ArrayList<>();
 
             this.view = view;
             this.inflater = LayoutInflater.from(view.getContext());
@@ -798,12 +797,10 @@ public class MaterialCalendarView extends FrameLayout {
             currentViews.add(monthView);
 
             //--- Set disabled days ---
-            for (CalendarDay day : disabledDays) {
-                if (month.getMonth() == day.getMonth()) {
-                    monthView.addDisabledDay(day);
-                }
+            for (Integer dayOfWeek : globalDisabledWeeks) {
+                monthView.addDisabledDayOfWeek(dayOfWeek);
             }
-            monthView.forceUpdateUi();
+
             //-------------------------
 
             return monthView;
@@ -952,30 +949,23 @@ public class MaterialCalendarView extends FrameLayout {
 
 
 
-
-
-
-        //--- Convenience method for enable / disable days ---
-        public void enableDayOfMonth(CalendarDay day, boolean enable) {
+        //--- Convenience methods for enable / disable days ---
+        public void enableDayOfWeek(int dayOfWeek, boolean enable) {
             if(!enable) {
                 for (MonthView monthView : currentViews) {
-                    if (((CalendarDay) monthView.getTag(TAG_ITEM)).getMonth() == day.getMonth()) {
-                        disabledDays.add(day);
-                        monthView.addDisabledDay(day);
-                        monthView.forceUpdateUi();
-                    }
+                    monthView.addDisabledDayOfWeek(dayOfWeek);
                 }
+
+                globalDisabledWeeks.add(dayOfWeek);
             } else {
                 for (MonthView monthView : currentViews) {
-                    if (((CalendarDay) monthView.getTag(TAG_ITEM)).getMonth() == day.getMonth()) {
-                        disabledDays.remove(day);
-                        monthView.removeDisabledDay(day);
-                        monthView.forceUpdateUi();
-                    }
+                    monthView.removeDisabledDayOfWeek(dayOfWeek);
                 }
+
+                globalDisabledWeeks.remove(Integer.valueOf(dayOfWeek));
             }
         }
-        //----------------------------------------------------
+        //-----------------------------------------------------
     }
 
 }

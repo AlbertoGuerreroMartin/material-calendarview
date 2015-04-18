@@ -22,6 +22,7 @@ public class BasicActivity extends ActionBarActivity implements OnDateChangedLis
 
     private static final DateFormat FORMATTER = SimpleDateFormat.getDateInstance();
     private TextView textView;
+    boolean debug = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,9 +42,10 @@ public class BasicActivity extends ActionBarActivity implements OnDateChangedLis
                 cal.setTimeInMillis(0);
                 cal.set(2015, Calendar.APRIL, 20);
 
-                System.out.println("Fecha a borrar: " + cal.toString());
+                widget.enableDayOfWeek(Calendar.MONDAY, debug);
+                widget.enableDayOfWeek(Calendar.WEDNESDAY, debug);
 
-                widget.enableDay(new CalendarDay(cal), false);
+                debug = !debug;
             }
         });
     }

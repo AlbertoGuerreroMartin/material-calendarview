@@ -8,7 +8,6 @@ import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 
 import static java.util.Calendar.DATE;
 import static java.util.Calendar.DAY_OF_WEEK;
@@ -44,14 +43,8 @@ class MonthView extends LinearLayout implements View.OnClickListener {
 
     private boolean showOtherDates = false;
 
-
-    private ArrayList<CalendarDay> disabledDays;
-
-
     public MonthView(Context context) {
         super(context);
-
-        disabledDays = new ArrayList<>();
 
         setOrientation(VERTICAL);
 
@@ -81,11 +74,26 @@ class MonthView extends LinearLayout implements View.OnClickListener {
 
 
     //--- Convenience methods for enable / disable days ---
-    public void addDisabledDay(CalendarDay day) {
-        disabledDays.add(day);
+    public void addDisabledDayOfWeek(int dayOfWeek) {
+
+        for (DayView dayView : monthDayViews) {
+            if (dayView.getDate().getCalendar().get(DAY_OF_WEEK) == dayOfWeek) {
+                dayView.setDayEnabled(false);
+            }
+        }
+
+        updateUi();
     }
-    public void removeDisabledDay(CalendarDay day) {
-        disabledDays.remove(day);
+
+    public void removeDisabledDayOfWeek(int dayOfWeek) {
+
+        for (DayView dayView : monthDayViews) {
+            if(dayView.getDate().getCalendar().get(DAY_OF_WEEK) == dayOfWeek) {
+                dayView.setDayEnabled(true);
+            }
+        }
+
+        updateUi();
     }
     //-----------------------------------------------------
 
@@ -182,18 +190,11 @@ class MonthView extends LinearLayout implements View.OnClickListener {
         for(DayView dayView : monthDayViews) {
             CalendarDay day = new CalendarDay(calendar);
             dayView.setDay(day);
-            if(disabledDays.contains(day)) {
-                dayView.setDayEnabled(false);
-            }
             dayView.setupSelection(showOtherDates, day.isInRange(minDate, maxDate), day.getMonth() == ourMonth);
             dayView.setChecked(day.equals(selection));
             calendar.add(DATE, 1);
         }
         postInvalidate();
-    }
-
-    public void forceUpdateUi() {
-        updateUi();
     }
 
     public void setCallbacks(Callbacks callbacks) {

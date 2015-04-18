@@ -16,6 +16,8 @@ import android.view.Gravity;
 import android.view.View;
 import android.widget.CheckedTextView;
 
+import java.util.List;
+
 /**
  * Display one day of a {@linkplain MaterialCalendarView}
  */
