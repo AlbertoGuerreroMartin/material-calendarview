@@ -95,6 +95,35 @@ class MonthView extends LinearLayout implements View.OnClickListener {
 
         updateUi();
     }
+
+
+    public void addDisabledDay(CalendarDay day) {
+        for (DayView dayView : monthDayViews) {
+            if(dayView.getDate().equals(day)) {
+                dayView.setDayEnabled(false);
+            }
+        }
+
+        updateUi();
+    }
+
+    public void removeDisabledDay(CalendarDay day) {
+        for (DayView dayView : monthDayViews) {
+            if(dayView.getDate().equals(day)) {
+                dayView.setDayEnabled(true);
+            }
+        }
+
+        updateUi();
+    }
+
+    public void enableAllDays(boolean enable) {
+        for (DayView dayView : monthDayViews) {
+            dayView.setDayEnabled(enable);
+        }
+
+        updateUi();
+    }
     //-----------------------------------------------------
 
 

@@ -9,6 +9,7 @@ import android.os.Parcelable;
 import android.support.annotation.ArrayRes;
 import android.support.v4.view.PagerAdapter;
 import android.support.v4.view.ViewPager;
+import android.util.ArrayMap;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -31,7 +32,9 @@ import com.prolificinteractive.materialcalendarview.format.WeekDayFormatter;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedList;
+import java.util.Map;
 
 /**
  * <p>
@@ -692,6 +695,17 @@ public class MaterialCalendarView extends FrameLayout {
     public void enableDayOfWeek(int dayOfWeek, boolean enable) {
         adapter.enableDayOfWeek(dayOfWeek, enable);
     }
+
+    public void enableDay(CalendarDay day, boolean enable) {
+        adapter.enableDay(day, enable);
+    }
+
+    public void enableAllDays(boolean enable) {
+        adapter.enableAllDays(enable);
+    }
+
+
+
     //------------------------------------------------------
 
     private static class MonthPagerAdapter extends PagerAdapter {
@@ -714,10 +728,12 @@ public class MaterialCalendarView extends FrameLayout {
         private WeekDayFormatter weekDayFormatter = WeekDayFormatter.DEFAULT;
 
         private ArrayList<Integer> globalDisabledWeeks;
+        private SparseArray<SparseArray<ArrayList<CalendarDay>>> globalDisabledDays;
 
         private MonthPagerAdapter(MaterialCalendarView view) {
 
             globalDisabledWeeks = new ArrayList<>();
+            globalDisabledDays = new SparseArray<>();
 
             this.view = view;
             this.inflater = LayoutInflater.from(view.getContext());
@@ -797,10 +813,22 @@ public class MaterialCalendarView extends FrameLayout {
             currentViews.add(monthView);
 
             //--- Set disabled days ---
+
             for (Integer dayOfWeek : globalDisabledWeeks) {
                 monthView.addDisabledDayOfWeek(dayOfWeek);
             }
 
+            if(month.getYear() == 2016) {
+                System.out.println(2016);
+            }
+
+            if (globalDisabledDays.get(month.getYear()) != null) {
+                ArrayList<CalendarDay> monthDisabledDays = globalDisabledDays.get(month.getYear()).get(month.getMonth());
+
+                for (CalendarDay day : monthDisabledDays) {
+                    monthView.addDisabledDay(day);
+                }
+            }
             //-------------------------
 
             return monthView;
@@ -963,6 +991,81 @@ public class MaterialCalendarView extends FrameLayout {
                 }
 
                 globalDisabledWeeks.remove(Integer.valueOf(dayOfWeek));
+            }
+        }
+
+
+        public void addGlobalDisabledDay(CalendarDay day) {
+
+            SparseArray<ArrayList<CalendarDay>> monthsMap;
+            if((globalDisabledDays.get(day.getYear())) == null) {
+                globalDisabledDays.put(day.getYear(), new SparseArray<ArrayList<CalendarDay>>());
+            }
+
+            monthsMap = globalDisabledDays.get(day.getYear());
+            if(monthsMap.get(day.getMonth()) == null) {
+                monthsMap.put(day.getMonth(), new ArrayList<CalendarDay>());
+            }
+
+            monthsMap.get(day.getMonth()).add(day);
+        }
+
+        public void removeGlobalDisabledDay(CalendarDay day) {
+            SparseArray<ArrayList<CalendarDay>> monthsMap;
+            monthsMap = globalDisabledDays.get(day.getYear());
+            if(monthsMap != null && monthsMap.get(day.getMonth()) != null) {
+                monthsMap.get(day.getMonth()).remove(day);
+            }
+        }
+
+
+        public void enableDay(CalendarDay day, boolean enable) {
+            if(!enable) {
+                for (MonthView monthView : currentViews) {
+//                    System.out.println("EQUALS: " + monthView.getTag(TAG_ITEM).equals(day));
+                    CalendarDay month = (CalendarDay) monthView.getTag(TAG_ITEM);
+                    if( month.getMonth() == day.getMonth()) {
+                        monthView.addDisabledDay(day);
+                    }
+                }
+
+                addGlobalDisabledDay(day);
+
+            } else {
+                for (MonthView monthView : currentViews) {
+                    CalendarDay month = (CalendarDay) monthView.getTag(TAG_ITEM);
+                    if(month.getMonth() == day.getMonth()) {
+                        monthView.removeDisabledDay(day);
+                    }
+                }
+
+                removeGlobalDisabledDay(day);
+            }
+        }
+
+        public void enableAllDays(boolean enable) {
+
+            //--- Clear flags to prevent collisions ---
+            globalDisabledWeeks.clear();
+            globalDisabledDays.clear();
+            //-----------------------------------------
+
+            if(!enable) {
+
+                // Add every day of every month in [minDate, maxDate] range as disabled
+                if (minDate != null && maxDate != null) {
+                    for (int i = minDate.getYear(); i <= maxDate.getYear(); ++i) {  // Years iteration
+                        for (int j = 0; j < 12; j++) {   // Months iteration
+                            CalendarDay month = new CalendarDay(i, j, 1);
+                            Calendar calendar = month.getCalendar();
+
+                            for (int k = 1; k <= calendar.getActualMaximum(Calendar.DAY_OF_MONTH); ++k) {
+                                System.out.println(i + "-" + j + "-" + k);
+                                enableDay(new CalendarDay(i, j, k), false);
+                            }
+                        }
+                    }
+                }
             }
         }
         //-----------------------------------------------------
